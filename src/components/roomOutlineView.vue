@@ -1,35 +1,43 @@
 <template>
-    <div id="room-outline">
-        <div v-if="searchingView">
-            <p>検索中...</p>
-        </div>
+    <div id="room-outline" class="body-padding">
+        <div class="content">
+            <div v-if="searchingView" class="result-section">
+                <p class="primary-text">検索中...</p>
+            </div>
 
-        <div v-if="roomOutlineView">
-            <p>タイトル</p>
-            <p>{{ title }}</p>
-            <router-link :to="{ name: 'form', query: { room: room, docId: docId }}">投票する</router-link>
-        </div>
+            <div v-if="roomOutlineView" class="result-section">
+                <p class="text-left supporting-text">タイトル</p>
+                <p class="text-left primary-text">{{ title }}</p>
+                <button v-on:click="goToVoteButtonClicked" class="primary-button">投票する</button>
+            </div>
 
-        <div v-if="noResultsView">
-            <p>"{{ enteredTitle }}":<br>該当なし</p>
-        </div>
+            <div v-if="noResultsView" class="result-section">
+                <p class="primary-text">"{{ enteredTitle }}":<br>該当なし</p>
+            </div>
 
-        <div v-if="isClosed">
-            <p>"{{ enteredTitle }}"は非公開です。</p>
-        </div>
+            <div v-if="isClosed" class="result-section">
+                <p class="primary-text">"{{ enteredTitle }}"は非公開です。</p>
+            </div>
 
-        <div v-if="resultView">
-            <p>タイトル</p>
-            <p>{{ resultTitle }}</p>
-            <p>結果</p>
-            <ul v-for="(results, index) in arrayOfResults">
-                <p v-if="arrayOfResults.length > 1">{{ index + 1 }}つ目の可能性</p>
-                <li v-for="result in results">
-                    <span>{{ result.rank }}</span><span>{{ result.name }}</span><span v-if="showRankLabel">{{ result.score }}</span>
-                </li>
-            </ul>
-            <p>投票のルール</p>
-            <p>この投票は{{ resultRule }}で集計されました。</p>
+            <div v-if="resultView" class="result-section">
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">タイトル</p>
+                    <p class="text-left primary-text">{{ resultTitle }}</p>
+                </div>
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">結果</p>
+                    <ul v-for="(results, index) in arrayOfResults">
+                        <p v-if="arrayOfResults.length > 1" class="text-left supporting-text">{{ index + 1 }}つ目の可能性</p>
+                        <li v-for="result in results" class="text-left primary-text results-table">
+                            <span class="rank-label">{{ result.rank }}</span><span class="optionname-label">{{ result.name }}</span><span v-if="showRankLabel" class="score-label">{{ result.score }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">投票のルール</p>
+                    <p class="text-left primary-text">この投票は{{ resultRule }}で集計されました。</p>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -87,6 +95,16 @@
         },
 
         methods: {
+            goToVoteButtonClicked: function() {
+                this.$router.push({
+                    name: 'form',
+                    query: {
+                        room: this.room,
+                        docId: this.docId
+                    }
+                });
+            },
+
             showRoomOutline: function() {
                 const enteredTitle = this.$route.query.enteredTitle;
                 this.enteredTitle = enteredTitle;
@@ -195,7 +213,7 @@
                     results[indexOftop1].score += 1;
                 }
                 results.sort(function(a, b) {
-                    return b - a;
+                    return b.score - a.score;
                 });
                 for (let i = 0; i < results.length; i++) {
                     results[i].rank = i + 1;
@@ -237,7 +255,7 @@
                     }
                 }
                 results.sort(function(a, b) {
-                    return b - a;
+                    return b.score - a.score;
                 });
                 for (let i = 0; i < results.length; i++) {
                     results[i].rank = i + 1;
@@ -459,8 +477,53 @@
         user-select: none;
     }
 
+    .body-padding {
+        padding: 20px;
+    }
+
     #room-outline li {
         list-style: none;
+    }
+
+    .content {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .result-section {
+        margin: 20px 0;
+    }
+
+    .result-small-section {
+        margin-bottom: 30px;
+    }
+
+    .supporting-text {
+        font-size: 10pt;
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    .primary-text {
+        font-size: 12pt;
+    }
+    
+    .results-table {
+        margin: 5px 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .rank-label {
+        width: 50px;
+    }
+    
+    .optionname-label {
+        min-width: 200px;
+    }
+    
+    .score-label {
+        min-width: 60px;
+        text-align: right;
     }
 
 </style>

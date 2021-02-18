@@ -1,13 +1,15 @@
 <template>
     <div id="search-app">
-        <p>ルーム名を検索して投票に参加</p>
-        <input type="text" v-model="enteredTitle" placeholder="ルーム名を入力" id="search-text-field">
+        <div class="home-section">
+            <p>ルーム名を検索して投票に参加</p>
+            <input type="text" v-model="enteredTitle" placeholder="ルーム名を入力" id="search-text-field" class="primary-textfield">
 
-        <button v-on:click="searchButtonClicked">検索</button>
+            <button v-on:click="searchButtonClicked" class="primary-button">検索</button>
+        </div>
 
-        <div v-if="showRecentRoomButton">
+        <div v-if="showRecentRoomButton" class="home-section">
             <p>最近参加したルーム</p>
-            <button v-on:click="recentRoomButtonClicked">{{ recentlyAttendedRoomTitle }}</button>
+            <button v-on:click="recentRoomButtonClicked" class="card-button">{{ recentlyAttendedRoomTitle }}</button>
         </div>
     </div>
 </template>
@@ -118,6 +120,34 @@
 <style>
     body {
         user-select: none;
+    }
+
+    .primary-textfield {
+        min-height: 33px;
+        min-width: 220px;
+        font-size: 11pt;
+        vertical-align: middle;
+        border: solid 1px rgb(200, 200, 200);
+        border-radius: 3px;
+        margin: 5px 0;
+    }
+
+    .card-button {
+        background: #FFFFFF;
+        border: solid 1px #E2E2E2;
+        color: rgb(20, 20, 20);
+        padding: 5px 15px;
+        border-radius: 3px;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 11pt;
+        padding: 10px 5px;
+        min-width: 200px;
+    }
+
+    .card-button:hover {
+        background: #E0E0E0;
+        cursor: pointer;
     }
 
 </style>

@@ -1,24 +1,44 @@
 <template>
-    <div id="roomsetting-app">
-        <p>タイトル</p>
-        <p>{{ room.title }}</p>
-        <p>説明</p>
-        <p>{{ room.explanation }}</p>
-        <p>選択肢</p>
-        <ul>
-            <li v-for="option in room.options">
-                <p>{{ option }}</p>
-            </li>
-        </ul>
-        <p>投票のルール</p>
-        <p>{{ rule }}</p>
+    <div id="roomsetting-app" class="body-padding">
+        <div class="content">
+            <div class="result-section">
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">タイトル</p>
+                    <p class="text-left primary-text">{{ room.title }}</p>
 
-        <div v-if="!hasSaved">
-            <input type="checkbox" id="setting-checkbox" @change="changed()" v-bind:checked="shouldbePublic">
-            <label for="setting-checkbox">公開する</label>
-            <button v-on:click="post" v-bind:disabled="!hasEdited">保存</button>
+                    <div class="result-small-section">
+                        <p class="text-left supporting-text">説明</p>
+                        <p class="text-left primary-text">{{ room.explanation }}</p>
+                    </div>
+                    <div class="result-small-section">
+                        <p class="text-left supporting-text">選択肢</p>
+                        <ul>
+                            <li v-for="option in room.options">
+                                <p class="text-left primary-text">{{ option }}</p>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="result-small-section">
+                        <p class="text-left supporting-text">投票のルール</p>
+                        <p class="text-left primary-text">{{ rule }}</p>
+                    </div>
+                    <div v-if="!hasSaved">
+                        <div class="result-small-section">
+                            <input type="checkbox" id="setting-checkbox" @change="changed()" v-bind:checked="shouldbePublic">
+                            <label for="setting-checkbox" class="primary-checkbox">公開する</label>
+                        </div>
+                        <div class="result-small-section">
+
+                            <button v-on:click="post" v-bind:disabled="!hasEdited" class="primary-button">保存</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <p v-if="hasSaved" class="text-left primary-text">変更を保存済み</p>
+            </div>
         </div>
-        <p v-if="hasSaved">変更を保存済み</p>
     </div>
 </template>
 

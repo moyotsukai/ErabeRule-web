@@ -1,36 +1,55 @@
 <template>
-    <div id="newroom-app">
-        <div v-if="!hasPosted">
-            <p>タイトル</p>
-            <input type="text" v-model="enteredTitle" placeholder="タイトルを入力">
-            <p v-if="shouldChangeTitle">すでに使われているタイトルです。末尾に数字をつけるなどしてみてください。</p>
+    <div id="newroom-app" class="body-padding">
+        <div class="content">
+            <div v-if="!hasPosted" class="result-section">
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">タイトル</p>
+                    <input type="text" v-model="enteredTitle" placeholder="タイトルを入力" class="primary-textfield newroom-textfield">
+                    <p v-if="shouldChangeTitle" class="text-left supporting-text error-color">すでに使われているタイトルです。末尾に数字をつけるなどしてみてください。</p>
+                </div>
 
-            <p>説明</p>
-            <button v-on:click="addExplanation" v-if="!hasAddedExplanation">説明文を追加</button>
-            <input type="text" v-model="enteredExplanation" placeholder="説明文を入力" v-if="hasAddedExplanation">
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">説明</p>
+                    <div class="text-left">
+                        <button v-on:click="addExplanation" v-if="!hasAddedExplanation" class="text-button">説明文を追加</button>
+                    </div>
+                    <input type="text" v-model="enteredExplanation" placeholder="説明文を入力" v-if="hasAddedExplanation" class="primary-textfield newroom-textfield">
+                </div>
 
-            <p>選択肢</p>
-            <ul>
-                <li v-for="option in enteredOptions">
-                    <input type="text" v-model="option.text" placeholder="選択肢を入力">
-                </li>
-                <button v-on:click="addOption">選択肢を追加</button>
-            </ul>
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">選択肢</p>
+                    <ul>
+                        <li v-for="option in enteredOptions">
+                            <input type="text" v-model="option.text" placeholder="選択肢を入力" class="primary-textfield newroom-textfield">
+                        </li>
+                        <div class="text-left">
+                            <button v-on:click="addOption" class="text-button">選択肢を追加</button>
+                        </div>
+                    </ul>
+                </div>
 
-            <p>投票のルールを選択</p>
-            <ul>
-                <li v-for="rule in rulesArray">
-                    <input type="radio" v-bind:id="rule.name" v-on:click="radioChecked(rule)">
-                    <label v-bind:for="rule.name">{{ rule.displayName }}</label>
-                    <p v-if="rule.checked">{{ rule.explanation }}</p>
-                </li>
-            </ul>
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">投票のルールを選択</p>
+                    <ul>
+                        <li v-for="rule in rulesArray" class="selectrule-table">
+                            <input type="radio" v-bind:id="rule.name" v-on:click="radioChecked(rule)">
+                            <label v-bind:for="rule.name" class="primary-radio">{{ rule.displayName }}</label>
+                            <p v-if="rule.checked" class="rule-explanation">{{ rule.explanation }}</p>
+                        </li>
+                    </ul>
+                </div>
 
-            <p>参加者は投票ルームのタイトルを入力することで検索できます。</p>
-            <button v-on:click="sendButtonClicled" v-bind:disabled="!isFormFilled">公開</button>
-        </div>
-        <div v-if="hasPosted">
-            <p>公開済み</p>
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">参加者は投票ルームのタイトルを入力することで検索できます。</p>
+                </div>
+
+                <div class="result-small-section">
+                    <button v-on:click="sendButtonClicled" v-bind:disabled="!isFormFilled" class="primary-button">公開</button>
+                </div>
+            </div>
+            <div v-if="hasPosted" class="result-section">
+                <p class="text-left primary-text">公開済み</p>
+            </div>
         </div>
     </div>
 </template>
@@ -197,53 +216,69 @@
                     });
                     if (roomData != undefined) {
                         this.shouldChangeTitle = true;
+
                     } else {
                         this.shouldChangeTitle = false;
-                    }
 
-                    //send
-                    const db = firebase.firestore();
-                    const roomRef = db.collection("rooms").doc();
-                    const newRoomId = roomRef.id;
-                    console.log("newRoomId: ", newRoomId);
-                    const userId = firebase.auth().currentUser.uid;
-                    console.log("userId: ", userId);
+                        //send
+                        const roomRef = db.collection("rooms").doc();
+                        const newRoomId = roomRef.id;
+                        console.log("newRoomId: ", newRoomId);
+                        const userId = firebase.auth().currentUser.uid;
+                        console.log("userId: ", userId);
 
-                    roomRef.set({
-                        title: this.enteredTitle,
-                        explanation: explanation,
-                        options: options,
-                        rule: this.selectedRule,
-                        state: "ongoing",
-                        senderId: userId,
-                        date: new Date()
+                        roomRef.set({
+                            title: this.enteredTitle,
+                            explanation: explanation,
+                            options: options,
+                            rule: this.selectedRule,
+                            state: "ongoing",
+                            senderId: userId,
+                            date: new Date()
 
-                    }).then(function() {
+                        }).then(function() {
 
-                        //getUserAttendance
-                        const userRef = db.collection("users").doc(userId);
-                        userRef.get().then(function(doc) {
-                            let createdRooms = [];
-                            if (doc.exists) {
-                                const userData = doc.data();
-                                if (userData.createdRooms != []) {
-                                    //Returning user
-                                    createdRooms = userData.createdRooms;
-                                    createdRooms.unshift(newRoomId);
-                                    //updateUserAttendance
-                                    userRef.update({
-                                        createdRooms: createdRooms,
-                                        date: new Date()
-                                    }).then(function() {
-                                        console.log("Successfully updated data");
-                                        //dismiss
-                                    }).catch(function(error) {
-                                        console.error("Error writing document: ", error);
-                                    });
-                                    console.log("returning");
+                            //getUserAttendance
+                            const userRef = db.collection("users").doc(userId);
+                            userRef.get().then(function(doc) {
+                                let createdRooms = [];
+                                if (doc.exists) {
+                                    const userData = doc.data();
+                                    if (userData.createdRooms != []) {
+                                        //Returning user
+                                        createdRooms = userData.createdRooms;
+                                        createdRooms.unshift(newRoomId);
+                                        //updateUserAttendance
+                                        userRef.update({
+                                            createdRooms: createdRooms,
+                                            date: new Date()
+                                        }).then(function() {
+                                            console.log("Successfully updated data");
+                                            //dismiss
+                                        }).catch(function(error) {
+                                            console.error("Error writing document: ", error);
+                                        });
+                                        console.log("returning");
 
+                                    } else {
+                                        //New user
+                                        createdRooms = [newRoomId];
+                                        //addUserAttendance
+                                        userRef.set({
+                                            attendedRooms: [],
+                                            createdRooms: createdRooms,
+                                            date: new Date()
+                                        }).then(function() {
+                                            console.log("Successfully set data");
+                                            //dismiss
+                                        }).catch(function(error) {
+                                            console.error("Error writing document: ", error);
+                                        });
+                                        console.log("new");
+
+                                    }
                                 } else {
-                                    //New user
+                                    //Unknown user
                                     createdRooms = [newRoomId];
                                     //addUserAttendance
                                     userRef.set({
@@ -256,36 +291,20 @@
                                     }).catch(function(error) {
                                         console.error("Error writing document: ", error);
                                     });
-                                    console.log("new");
+                                    console.log("unknown");
 
                                 }
-                            } else {
-                                //Unknown user
-                                createdRooms = [newRoomId];
-                                //addUserAttendance
-                                userRef.set({
-                                    attendedRooms: [],
-                                    createdRooms: createdRooms,
-                                    date: new Date()
-                                }).then(function() {
-                                    console.log("Successfully set data");
-                                    //dismiss
-                                }).catch(function(error) {
-                                    console.error("Error writing document: ", error);
-                                });
-                                console.log("unknown");
-
-                            }
+                            }).catch(function(error) {
+                                console.error("Error getting document: ", error);
+                            });
                         }).catch(function(error) {
-                            console.error("Error getting document: ", error);
+                            console.error("Error writing document: ", error);
                         });
-                    }).catch(function(error) {
-                        console.error("Error writing document: ", error);
-                    });
+                        this.hasPosted = true;
+                    }
 
                 });
 
-                this.hasPosted = true;
             }
         }
     }
@@ -299,6 +318,39 @@
 
     #newroom-app li {
         list-style: none;
+    }
+
+    .newroom-textfield {
+        width: 100%;
+    }
+
+    .selectrule-table {
+        margin: 10px 0;
+        text-align: left;
+    }
+
+    .rule-explanation {
+        margin: 0 0 0 30px;
+        font-weight: 200;
+    }
+
+    .text-button {
+        text-align: center;
+        color: #2D4BF2;
+        border: none;
+        background: 0;
+        padding: 5px 15px;
+        border-radius: 5px;
+        vertical-align: middle;
+        font-size: 11pt;
+    }
+
+    .text-button:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .error-color {
+        color: #B00020;
     }
 
 </style>

@@ -1,31 +1,47 @@
 <template>
-    <div id="form">
-        <p>タイトル</p>
-        <p>{{ title }}</p>
-        <div v-if="showForm">
+    <div id="form" class="body-padding">
+        <div class="content">
+            <div class="result-section">
+                <div class="result-small-section">
+                    <p class="text-left supporting-text">タイトル</p>
+                    <p class="text-left primary-text">{{ title }}</p>
+                </div>
 
-            <p v-if="hasExplanation">説明</p>
-            <p v-if="hasExplanation">{{ explanation }}</p>
+                <div v-if="showForm">
+                    <div class="result-small-section">
 
-            <p>選択肢（支持する順に選んで順位をつけます。）</p>
+                        <p v-if="hasExplanation" class="text-left supporting-text">説明</p>
+                        <p v-if="hasExplanation" class="text-left primary-text">{{ explanation }}</p>
+                    </div>
 
-            <ul>
-                <li v-for="option in options">
-                    <input type="checkbox" v-bind:id="option.name + option.index" v-model="option.checked" @change="changed(option)" v-if="isCheckBoxStyle">
-                    <input type="radio" v-bind:id="option.name + option.index" v-model="option.checked" v-on:click="radioChecked(option)" v-if="isRadioStyle">
-                    <label v-bind:for="option.name + option.index">{{ option.name }}</label>
-                    <label v-bind:for="option.name + option.index" v-if="showRankLabel && option.personalRank != 0">{{ option.personalRank }}</label>
-                </li>
-            </ul>
+                    <div class="result-small-section">
+                        <p class="text-left supporting-text">選択肢（支持する順に選んで順位をつけます。）</p>
+                        <ul>
+                            <li v-for="option in options" class="text-left primary-text results-table">
+                                <input type="checkbox" v-bind:id="option.name + option.index" v-model="option.checked" @change="changed(option)" v-if="isCheckBoxStyle">
+                                <input type="radio" v-bind:id="option.name + option.index" v-model="option.checked" v-on:click="radioChecked(option)" v-if="!isCheckBoxStyle">
+                                <label v-bind:for="option.name + option.index" class="optionname-label" v-bind:class="isCheckBoxStyle? 'primary-checkbox' : 'primary-radio'">{{ option.name }}</label>
+                                <label v-bind:for="option.name + option.index" v-if="showRankLabel && option.personalRank != 0" class="personalrank-label">{{ option.personalRank }}</label>
+                            </li>
+                        </ul>
+                    </div>
 
-            <p>この投票は{{ rule }}で集計されます。</p>
+                    <div class="result-small-section">
+                        <p class="text-left supporting-text">この投票は{{ rule }}で集計されます。</p>
+                    </div>
 
-            <button v-bind:disabled="!isFormFilled" v-on:click="send">送信</button>
-        </div>
+                    <div class="result-small-section">
+                        <button v-bind:disabled="!isFormFilled" v-on:click="send" class="primary-button">送信</button>
+                    </div>
+                </div>
+            </div>
 
-        <div v-if="showResultView">
-            <p>投票済み</p>
-            <button v-on:click="goToResult">結果を見る</button>
+            <div class="result-section">
+                <div v-if="showResultView">
+                    <p class="text-left">投票済み</p>
+                    <button v-on:click="goToResult" class="primary-button">結果を見る</button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -44,7 +60,6 @@
                 explanation: "",
                 options: [],
                 isCheckBoxStyle: true,
-                isRadioStyle: false,
                 showRankLabel: true,
                 rule: "",
                 personalRank: [],
@@ -77,7 +92,6 @@
 
             if (this.roomData.rule == "majorityRule") {
                 this.isCheckBoxStyle = false;
-                this.isRadioStyle = true;
                 this.showRankLabel = false;
             }
 
@@ -242,62 +256,6 @@
                 this.showResultView = true;
             },
 
-            //            getUserAttendance: function() {
-            // const db = firebase.firestore();
-            // const userId = firebase.auth().currentUser.uid;
-            // console.log("userId: ", userId);
-            // const userRef = db.collection("users").doc(userId);
-            // userRef.get().then(function(doc) {
-            // let attendedRooms = [];
-            // if (doc.exists) {
-            // const userData = doc.data();
-            // if (userData.attendedRooms != []) {
-            // //Returning user
-            // attendedRooms = userData.attendedRooms;
-            // const newRoom = this.docId;
-            // attendedRooms.unshift(newRoom);
-            // this.updateUserAttendance(attendedRooms, userRef);
-            // console.log("returning");
-            // } else {
-            // //New user
-            // this.addUserAttendance(attendedRooms, userRef);
-            // console.log("new");
-            // }
-            // } else {
-            // //Unknown user
-            // this.addUserAttendance(attendedRooms, userRef);
-            // console.log("unknown");
-            // }
-            // }).catch(function(error) {
-            // console.error("Error getting document: ", error);
-            // });
-            // },
-
-            //            addUserAttendance: function(attendedRooms, userRef) {
-            //                userRef.set({
-            //                    attendedRooms: attendedRooms,
-            //                    createdRooms: [],
-            //                    date: new Date()
-            //                }).then(function() {
-            //                    console.log("Successfully set data")
-            //                    //dismiss
-            //                }).catch(function(error) {
-            //                    console.error("Error writing document: ", error);
-            //                });
-            //            },
-
-            //            updateUserAttendance: function(attendedRooms, userRef) {
-            //                userRef.update({
-            //                    attendedRooms: attendedRooms,
-            //                    date: new Date()
-            //                }).then(function() {
-            //                    console.log("Successfully updated data")
-            //                    //dismiss
-            //                }).catch(function(error) {
-            //                    console.error("Error writing document: ", error);
-            //                });
-            //            },
-
             goToResult: function() {
                 this.$router.push({
                     name: 'roomOutline',
@@ -333,6 +291,108 @@
 
     #form li {
         list-style: none;
+    }
+
+    .primary-button:disabled {
+        background: rgba(48, 79, 254, 0.38);
+        cursor: default;
+    }
+
+
+    input[type=radio] {
+        display: none;
+    }
+
+    .primary-radio {
+        box-sizing: border-box;
+        cursor: pointer;
+        display: inline-block;
+        padding: 5px 30px;
+        position: relative;
+        width: auto;
+    }
+
+    .primary-radio::before {
+        border: 1px solid #304FFE;
+        border-radius: 50%;
+        content: '';
+        display: block;
+        height: 16px;
+        left: 5px;
+        margin-top: -8px;
+        position: absolute;
+        top: 50%;
+        width: 16px;
+    }
+
+    .primary-radio::after {
+        background: #304FFE;
+        border-radius: 50%;
+        content: '';
+        display: block;
+        height: 10px;
+        left: 8px;
+        margin-top: -5px;
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        width: 10px;
+    }
+
+    input[type=radio]:checked+.primary-radio::after {
+        opacity: 1;
+    }
+
+
+    input[type=checkbox] {
+        display: none;
+    }
+
+    .primary-checkbox {
+        box-sizing: border-box;
+        cursor: pointer;
+        display: inline-block;
+        padding: 5px 30px;
+        position: relative;
+        width: auto;
+    }
+
+    .primary-checkbox::before {
+        border: 1px solid #304FFE;
+        border-radius: 1px;
+        content: '';
+        display: block;
+        height: 16px;
+        left: 5px;
+        margin-top: -8px;
+        position: absolute;
+        top: 50%;
+        width: 16px;
+    }
+
+    .primary-checkbox::after {
+        border-right: 2px solid #304FFE;
+        border-bottom: 2px solid #304FFE;
+        content: '';
+        display: block;
+        height: 12px;
+        width: 6px;
+        left: 10px;
+        margin-top: -8px;
+        opacity: 0;
+        position: absolute;
+        top: 50%;
+        transform: rotate(45deg);
+    }
+
+    input[type=checkbox]:checked+.primary-checkbox::after {
+        opacity: 1;
+    }
+
+    .personalrank-label {
+        min-width: 60px;
+        text-align: right;
+        color: #2D4BF2;
     }
 
 </style>

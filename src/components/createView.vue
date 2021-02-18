@@ -1,11 +1,13 @@
 <template>
     <div id="create-app">
-        <p>新しい投票ルームを作成</p>
-        <button v-on:click="createButtonClicked">作成</button>
+        <div class="home-section">
+            <p>新しい投票ルームを作成</p>
+            <button v-on:click="createButtonClicked" class="primary-button">作成</button>
+        </div>
 
-        <div v-if="showRecentRoomButton">
+        <div v-if="showRecentRoomButton" class="home-section">
             <p>最近作成したルーム</p>
-            <button v-on:click="recentRoomButtonClicked">{{ recentlyCreatedRoomTitle }}</button>
+            <button v-on:click="recentRoomButtonClicked" class="card-button">{{ recentlyCreatedRoomTitle }}</button>
         </div>
     </div>
 </template>
