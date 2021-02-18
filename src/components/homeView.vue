@@ -1,5 +1,5 @@
 <template>
-    <div id="home-app">
+    <div id="home-app" class="body-padding">
         <div class="home-content">
             <div class="home-section">
                 <p>ErabeRuleは、多数決に加え様々なルールを使って投票ができる投票アプリです。</p>
@@ -55,7 +55,8 @@
     }
 
     .home-content {
-        margin: 0 20px;
+        max-width: 800px;
+        margin: 0 auto;
     }
 
     #home-app il {
