@@ -123,13 +123,21 @@
     }
 
     .primary-textfield {
+        /*
         min-height: 33px;
         min-width: 220px;
         font-size: 11pt;
+        */
+        min-height: 37px;
+        min-width: 244px;
+        font-size: 16px;
+        transform: scale(0.9);
+
         vertical-align: middle;
         border: solid 1px rgb(200, 200, 200);
         border-radius: 3px;
         margin: 5px 0;
+        box-shadow: none;
     }
 
     .card-button {
