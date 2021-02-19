@@ -321,8 +321,9 @@
     }
 
     .newroom-textfield {
-/*        width: 100%;*/
+        /*        width: 100%;*/
         width: 111%;
+        margin-left: -5.5%;
     }
 
     .selectrule-table {
@@ -333,6 +334,7 @@
     .rule-explanation {
         margin: 0 0 0 30px;
         font-weight: 200;
+        color: rgba(0, 0, 0, 0.7);
     }
 
     .text-button {
