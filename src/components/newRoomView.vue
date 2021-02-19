@@ -321,7 +321,8 @@
     }
 
     .newroom-textfield {
-        width: 100%;
+/*        width: 100%;*/
+        width: 111%;
     }
 
     .selectrule-table {

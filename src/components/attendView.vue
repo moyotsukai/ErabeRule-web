@@ -133,6 +133,7 @@
         font-size: 16px;
         transform: scale(0.9);
 
+        -webkit-appearance: none;
         vertical-align: middle;
         border: solid 1px rgb(200, 200, 200);
         border-radius: 3px;
