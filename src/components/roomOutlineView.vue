@@ -19,7 +19,11 @@
                 <p class="primary-text">"{{ enteredTitle }}"は非公開です。</p>
             </div>
 
-            <div v-if="resultView" class="result-section">
+            <div v-if="resultView" class="result-section text-right">
+                <div class="small-loading-section">
+                    <p class="supporting-text inlineblock margin-zero-p">リアルタイムで反映中</p>
+                    <div class="small-loading inlineblock"></div>
+                </div>
                 <div class="result-small-section">
                     <p class="text-left supporting-text">タイトル</p>
                     <p class="text-left primary-text">{{ resultTitle }}</p>
@@ -31,6 +35,7 @@
                         <li v-for="result in results" class="text-left primary-text results-table">
                             <span class="rank-label">{{ result.rank }}</span><span class="optionname-label">{{ result.name }}</span><span v-if="showRankLabel" class="score-label">{{ result.score }}</span>
                         </li>
+                        <p class="text-right supporting-text">{{ numOfVoters }}人が投票済み</p>
                     </ul>
                 </div>
                 <div class="result-small-section">
@@ -64,7 +69,8 @@
                 arrayOfResults: [],
                 resultRule: "",
                 roomData: undefined,
-                personalRanks: []
+                personalRanks: [],
+                numOfVoters: []
             }
         },
 
@@ -113,8 +119,8 @@
                 const roomsRef = db.collection("rooms");
 
                 roomsRef.where("title", "==", enteredTitle).get().then((querySnapshot) => {
+                    let roomData;
                     querySnapshot.forEach((doc) => {
-                        let roomData;
 
                         const attendedRooms = this.$route.query.attendedRooms;
                         if (attendedRooms.includes(doc.id)) {
@@ -134,12 +140,12 @@
                         }
                         this.room = roomData;
                         this.docId = doc.id;
-
-                        if (roomData == undefined) {
-                            this.searchingView = false;
-                            this.noResultsView = true;
-                        }
                     });
+
+                    if (roomData == undefined) {
+                        this.searchingView = false;
+                        this.noResultsView = true;
+                    }
                 });
             },
 
@@ -155,12 +161,15 @@
 
                 this.unsubscribe = votesRef.onSnapshot(snapshot => {
                     let ranks = [];
+                    let num = 0;
                     snapshot.docChanges().forEach(change => {
                         if (change.type === "added") {
                             ranks.push(change.doc.data().personalRank);
+                            num += 1;
                         }
                     });
                     this.personalRanks = this.personalRanks.concat(ranks);
+                    this.numOfVoters += num;
                     console.log("personalRanks", this.personalRanks);
                 });
 
@@ -491,7 +500,7 @@
     }
 
     .result-section {
-        margin: 20px 0;
+        margin: 5px 0 20px 0;
     }
 
     .result-small-section {
@@ -506,24 +515,61 @@
     .primary-text {
         font-size: 12pt;
     }
-    
+
     .results-table {
         margin: 5px 0;
         display: flex;
         justify-content: space-between;
     }
-    
+
     .rank-label {
         width: 50px;
     }
-    
+
     .optionname-label {
         min-width: 200px;
     }
-    
+
     .score-label {
         min-width: 60px;
         text-align: right;
+    }
+
+    .small-loading-section {
+        margin: 0;
+    }
+
+    .text-right {
+        text-align: right;
+    }
+
+    .margin-zero-p {
+        margin: 0;
+    }
+
+    .inlineblock {
+        display: inline-block;
+        text-align: right;
+        vertical-align: middle;
+    }
+
+    .small-loading {
+        border: 2px solid #cccccc;
+        border-radius: 50%;
+        border-top: 2px solid #2D4BF2;
+        width: 15px;
+        height: 15px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
 </style>
