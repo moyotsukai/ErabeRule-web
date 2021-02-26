@@ -132,7 +132,7 @@ export default {
       });
     },
 
-    showRoomOutline: function () {
+    showRoomOutline: async function () {
       const enteredTitle = this.$route.query.enteredTitle;
       this.enteredTitle = enteredTitle;
 
@@ -144,7 +144,9 @@ export default {
         .get()
         .then((querySnapshot) => {
           let roomData;
+          console.log("querySnapshot: ", querySnapshot);
           querySnapshot.forEach((doc) => {
+            console.log("query shapshot");
             const attendedRooms = this.$route.query.attendedRooms;
             if (attendedRooms.includes(doc.id)) {
               this.roomData = doc.data();
@@ -165,7 +167,7 @@ export default {
             this.docId = doc.id;
           });
 
-          if (roomData == undefined) {
+          if (querySnapshot.docs.length <= 0) {
             this.searchingView = false;
             this.noResultsView = true;
           }
