@@ -146,7 +146,6 @@ export default {
           let roomData;
           console.log("querySnapshot: ", querySnapshot);
           querySnapshot.forEach((doc) => {
-            console.log("query shapshot");
             const attendedRooms = this.$route.query.attendedRooms;
             if (attendedRooms.includes(doc.id)) {
               this.roomData = doc.data();
