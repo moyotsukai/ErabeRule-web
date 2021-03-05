@@ -115,7 +115,7 @@
     font-size: 10pt;
     text-align: center;
     color: rgb(100, 100, 100);
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(240, 240, 240);
     border-top: 1px solid rgb(200, 200, 200);
     cursor: default;
     position: absolute;
