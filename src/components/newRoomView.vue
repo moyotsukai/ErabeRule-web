@@ -333,7 +333,7 @@
 
     .rule-explanation {
         margin: 0 0 0 30px;
-        font-weight: 200;
+        font-weight: 400;
         color: rgba(0, 0, 0, 0.7);
     }
 
