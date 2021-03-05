@@ -216,10 +216,11 @@ export default {
             break;
           case "condorcetRule":
             this.showRankLabel = false;
-            this.arrayOfResults = this.condorcetRule(
+            const condorcetResult = this.condorcetRule(
               this.personalRanks,
               roomData
             );
+            this.arrayOfResults = this.removeDuplication(condorcetResult)
             break;
           default:
             break;
@@ -235,6 +236,34 @@ export default {
         }
         console.log("personalRanks: ", this.personalRanks);
       }
+    },
+
+    removeDuplication: function (arrayOfResults) {
+      //jsではsliceされた要素は参照が異なるので、異なる値としてみられる
+      // mapを使ってarrayIndexのみの配列を作ってそれを比較すれば参照にならない。
+      const optionNames = arrayOfResults.map(function(results) {
+        let optionsName = ""
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i]
+          optionsName += result.name + result.arrayIndex
+        }
+        return optionsName;
+      });
+      console.log("optionNames: ", optionNames);
+
+      const newArray = [arrayOfResults[0]];
+      for (let i = 0; i < arrayOfResults.length; i++) {
+        for (let j = 0; j < i; j++) {
+          if (i === 0) { break; }
+          const resultsI = optionNames[i];
+          const resultsJ = optionNames[j];
+          if (resultsI === resultsJ) { break; }
+          if (j === i - 1) {
+            newArray.push(arrayOfResults[i]);
+          }
+        }
+      }
+      return newArray;
     },
 
     majorityRule: function (personalRanks, roomData) {
@@ -362,7 +391,7 @@ export default {
           }
         }
       }
-      console.log(nArray);
+      console.log("nArray", nArray);
 
       //calculate pArrayElements
       let pArrayElements = this.pArrayElementsCalculate(numOfOptions);
@@ -399,7 +428,7 @@ export default {
           pArray[k] += nElements[i];
         }
       }
-      console.log(pArray);
+      console.log("pArray", pArray);
 
       //    //find the biggests
       let maxIndexes = [0];
@@ -415,24 +444,29 @@ export default {
           maxIndexes.push(i + 1);
         }
       }
-      let maxPElements = [];
+      const maxPElements = [];
       for (let i = 0; i < maxIndexes.length; i++) {
         maxPElements.push(pArrayElements[maxIndexes[i]]);
       }
-      console.log(maxPElements);
+      console.log("maxPElements", maxPElements);
 
       //refine results
-      let arrayOfResults = [];
+      const arrayOfResults = [];
       for (let k = 0; k < maxPElements.length; k++) {
         let maxPElement = maxPElements[k];
         for (let i = 0; i < numOfOptions; i++) {
           results[i].rank = maxPElement[i] + 1;
         }
+        console.log("results", results);
         //sort
-        results.sort(this.compareRanks);
-
-        arrayOfResults.push(results);
+        results.sort(function(a, b) {
+          return a.rank - b.rank;
+        });
+        console.log("results", results);
+        //jsは参照なので、sliceしないと最後のsort結果が全部反映されてしまう。
+        arrayOfResults.push(results.slice());
       }
+      console.log("arrayOfResults: ", arrayOfResults);
 
       return arrayOfResults;
     },
