@@ -89,7 +89,7 @@ body {
   color: #ffffff;
   background: #304ffe;
   border: none;
-  padding: 5px 15px;
+  padding: 5px 17px;
   border-radius: 3px;
   vertical-align: middle;
   font-size: 11pt;
@@ -103,7 +103,7 @@ body {
 .primary-link {
   color: #2d4bf2;
   text-decoration: none;
-  padding: 10px;
+  padding: 5px 8px;
   margin: 5px;
   border-radius: 5px;
 }
