@@ -193,7 +193,7 @@ export default {
           }
         });
         this.personalRanks = this.personalRanks.concat(ranks);
-        this.numOfVoters += num;
+        this.numOfVoters = snapshot.docs.length;
         console.log("personalRanks", this.personalRanks);
       });
 
