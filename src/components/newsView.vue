@@ -1,5 +1,5 @@
 <template>
-  <div id="news-app">
+  <div id="news-app" class="body-padding">
     <div class="home-content">
       <div class="home-section">
         <p class="page-title">リリースノート</p>
@@ -43,16 +43,6 @@
   }
 
   .news {
-    margin: 20px 0;
-  }
-
-  .supporting-text {
-    font-size: 10pt;
-    color: #4c4c4c;
-  }
-
-  .primary-text {
-    font-size: 12pt;
-    color: #000000;
+    margin: 30px 0;
   }
 </style>
