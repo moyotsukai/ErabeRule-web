@@ -54,7 +54,7 @@
   }
 
   #header {
-    background: #FFFFFF;
+    background: #fcfcfc;
     border-bottom: 1px solid rgb(180, 180, 180);
     display: flex;
     justify-content: flex-start;

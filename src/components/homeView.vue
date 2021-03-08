@@ -13,7 +13,7 @@
         <a
           href="https://apps.apple.com/jp/app/eraberule/id1552835670"
           class="primary-link"
-          >ErabeRule iOS版 ></a
+          >ErabeRule&nbsp;iOS版&nbsp;></a
         >
       </div>
 
@@ -46,6 +46,10 @@
             集計はアプリが自動で計算してくれるので、面倒な集計作業は必要はありません。
           </li>
         </ul>
+      </div>
+      <div class="home-section">
+        <p>新着情報をみる</p>
+        <router-link to="/news" class="primary-link">リリースノート&nbsp;></router-link>
       </div>
     </div>
   </div>

@@ -63,6 +63,63 @@
             この投票は{{ resultRule }}で集計されました。
           </p>
         </div>
+        <div class="result-small-section">
+          <div v-if="roomData.rule !== 'majorityRule'" class="text-left">
+            <div v-if="isViewOtherResultsActive">
+              <div v-if="otherRulesResults.majorityRule !== undefined">
+                <ul v-for="results in otherRulesResults.majorityRule">
+                  <p>もし多数決だったら</p>
+                  <li
+                    v-for="result in results"
+                    class="text-left primary-text results-table"
+                  >
+                    <span class="rank-label">{{ result.rank }}</span
+                    ><span class="optionname-label">{{ result.name }}</span
+                    ><span v-if="showRankLabel" class="score-label">{{
+                      result.score
+                    }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div v-if="otherRulesResults.bordaRule !== undefined">
+                <ul v-for="results in otherRulesResults.bordaRule">
+                  <p>もしボルダルールだったら</p>
+                  <li
+                    v-for="result in results"
+                    class="text-left primary-text results-table"
+                  >
+                    <span class="rank-label">{{ result.rank }}</span
+                    ><span class="optionname-label">{{ result.name }}</span
+                    ><span v-if="showRankLabel" class="score-label">{{
+                      result.score
+                    }}</span>
+                  </li>
+                </ul>
+              </div>
+              <div v-if="otherRulesResults.condorcetRule !== undefined">
+                <ul v-for="(results, index) in otherRulesResults.condorcetRule">
+                  <p class="text-left supporting-text">
+                    もしコンドルセ・ヤングの最尤法だったら
+                    <span v-if="otherRulesResults.condorcetRule.length > 1">
+                      ({{ index + 1 }}つ目の可能性)
+                    </span>
+                  </p>
+                  <li
+                    v-for="result in results"
+                    class="text-left primary-text results-table"
+                  >
+                    <span class="rank-label">{{ result.rank }}</span>
+                    <span class="optionname-label">{{ result.name }}</span>
+                  </li>
+                </ul>
+              </div>
+          </div>
+          <button v-on:click="toggleViewOtherRules" class="text-button">
+            <div v-if="isViewOtherResultsActive">結果の検証を非表示</div>
+            <div v-else>結果の検証を表示</div>
+          </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -92,6 +149,8 @@ export default {
       roomData: undefined,
       personalRanks: [],
       numOfVoters: [],
+      isViewOtherResultsActive: false,
+      otherRulesResults: []
     };
   },
 
@@ -185,11 +244,9 @@ export default {
 
       this.unsubscribe = votesRef.onSnapshot((snapshot) => {
         let ranks = [];
-        let num = 0;
         snapshot.docChanges().forEach((change) => {
           if (change.type === "added") {
             ranks.push(change.doc.data().personalRank);
-            num += 1;
           }
         });
         this.personalRanks = this.personalRanks.concat(ranks);
@@ -213,6 +270,17 @@ export default {
             break;
           case "bordaRule":
             this.arrayOfResults = this.bordaRule(this.personalRanks, roomData);
+            this.otherRulesResults = {majorityRule: [], condorcetRule: []};
+            this.otherRulesResults.majorityRule = this.majorityRule(
+              this.personalRanks,
+              roomData
+            );
+            const condorcetResultAsOtherRule = this.condorcetRule(
+              this.personalRanks,
+              roomData
+            );
+            this.otherRulesResults.condorcetRule = this.removeDuplication(condorcetResultAsOtherRule);
+            console.log("otherRulesResults", this.otherRulesResults);
             break;
           case "condorcetRule":
             this.showRankLabel = false;
@@ -220,7 +288,17 @@ export default {
               this.personalRanks,
               roomData
             );
-            this.arrayOfResults = this.removeDuplication(condorcetResult)
+            this.arrayOfResults = this.removeDuplication(condorcetResult);
+            this.otherRulesResults = {majorityRule: [], bordaRule: []};
+            this.otherRulesResults.majorityRule = this.majorityRule(
+              this.personalRanks,
+              roomData
+            );
+            this.otherRulesResults.bordaRule = this.bordaRule(
+              this.personalRanks,
+              roomData
+            );
+            console.log("otherRulesResults", this.otherRulesResults)
             break;
           default:
             break;
@@ -264,6 +342,14 @@ export default {
         }
       }
       return newArray;
+    },
+
+    toggleViewOtherRules: function () {
+      if (this.isViewOtherResultsActive) {
+        this.isViewOtherResultsActive = false;
+      } else {
+        this.isViewOtherResultsActive = true;
+      }
     },
 
     majorityRule: function (personalRanks, roomData) {
@@ -575,11 +661,12 @@ body {
 
 .supporting-text {
   font-size: 10pt;
-  color: rgba(0, 0, 0, 0.7);
+  color: #4c4c4c;
 }
 
 .primary-text {
   font-size: 12pt;
+  color: #000000;
 }
 
 .results-table {
@@ -671,5 +758,20 @@ body {
     height: 100%;
     margin: 0;
   }
+}
+
+.text-button {
+    text-align: center;
+    color: #2D4BF2;
+    border: none;
+    background: 0;
+    padding: 5px 15px;
+    border-radius: 5px;
+    vertical-align: middle;
+    font-size: 11pt;
+}
+
+.text-button:hover {
+    background: rgba(0, 0, 0, 0.05);
 }
 </style>
