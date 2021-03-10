@@ -144,6 +144,7 @@
     .primary-textfield:focus {
       border: solid 1px #304ffe;
       border-radius: 3px;;
+      outline: none;
     }
 
     .card-button {
