@@ -46,11 +46,10 @@
               v-for="result in results"
               class="text-left primary-text results-table"
             >
-              <span class="rank-label">{{ result.rank }}</span
-              ><span class="optionname-label">{{ result.name }}</span
-              ><span v-if="showRankLabel" class="score-label">{{
-                result.score
-              }}</span>
+              <span class="rank-label">{{ result.rank }}</span>
+              <span class="optionname-label">{{ result.name }}</span>
+              <span v-if="showRankLabel" class="score-label">{{ result.score }}</span>
+              <span v-else></span>
             </li>
             <p class="text-right supporting-text">
               {{ numOfVoters }}人が投票済み
@@ -73,11 +72,9 @@
                     v-for="result in results"
                     class="text-left primary-text results-table"
                   >
-                    <span class="rank-label">{{ result.rank }}</span
-                    ><span class="optionname-label">{{ result.name }}</span
-                    ><span v-if="showRankLabel" class="score-label">{{
-                      result.score
-                    }}</span>
+                    <span class="rank-label">{{ result.rank }}</span>
+                    <span class="optionname-label">{{ result.name }}</span>
+                    <span class="score-label">{{ result.score }}</span>
                   </li>
                 </ul>
               </div>
@@ -88,11 +85,9 @@
                     v-for="result in results"
                     class="text-left primary-text results-table"
                   >
-                    <span class="rank-label">{{ result.rank }}</span
-                    ><span class="optionname-label">{{ result.name }}</span
-                    ><span v-if="showRankLabel" class="score-label">{{
-                      result.score
-                    }}</span>
+                    <span class="rank-label">{{ result.rank }}</span>
+                    <span class="optionname-label">{{ result.name }}</span>
+                    <span class="score-label">{{ result.score }}</span>
                   </li>
                 </ul>
               </div>
@@ -110,6 +105,7 @@
                   >
                     <span class="rank-label">{{ result.rank }}</span>
                     <span class="optionname-label">{{ result.name }}</span>
+                    <span class="score-label"></span>
                   </li>
                 </ul>
               </div>
@@ -549,6 +545,10 @@ export default {
           return a.rank - b.rank;
         });
         console.log("results", results);
+        for (let i = 0; i < results.length; i++) {
+          const result = results[i];
+          result.rank += "位";
+        }
         //jsは参照なので、sliceしないと最後のsort結果が全部反映されてしまう。
         arrayOfResults.push(results.slice());
       }
@@ -758,20 +758,5 @@ body {
     height: 100%;
     margin: 0;
   }
-}
-
-.text-button {
-    text-align: center;
-    color: #2D4BF2;
-    border: none;
-    background: 0;
-    padding: 5px 15px;
-    border-radius: 5px;
-    vertical-align: middle;
-    font-size: 11pt;
-}
-
-.text-button:hover {
-    background: rgba(0, 0, 0, 0.05);
 }
 </style>

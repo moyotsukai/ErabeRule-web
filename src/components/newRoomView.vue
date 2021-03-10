@@ -352,6 +352,10 @@
         background: rgba(0, 0, 0, 0.05);
     }
 
+    .text-button:focus:not(:focus-visible) {
+      outline: none;
+    }
+
     .error-color {
         color: #B00020;
     }

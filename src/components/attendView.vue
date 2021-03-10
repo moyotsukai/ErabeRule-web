@@ -141,6 +141,11 @@
         box-shadow: none;
     }
 
+    .primary-textfield:focus {
+      border: solid 1px #304ffe;
+      border-radius: 3px;;
+    }
+
     .card-button {
         background: #FFFFFF;
         border: solid 1px #E2E2E2;
@@ -152,6 +157,10 @@
         font-size: 11pt;
         padding: 10px 5px;
         min-width: 200px;
+    }
+
+    .card-button:focus:not(:focus-visible) {
+      outline: none;
     }
 
     .card-button:hover {

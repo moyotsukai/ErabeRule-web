@@ -104,6 +104,10 @@ body {
   cursor: pointer;
 }
 
+.primary-button:focus:not(:focus-visible){
+  outline: none;
+}
+
 .primary-link {
   color: #2d4bf2;
   text-decoration: none;
