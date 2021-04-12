@@ -53,7 +53,7 @@ export default new Router({
             component: news
         }
   ],
-  scrollBehaivor() {
+  scrollBehavior() {
     return { x: 0, y: 0 }
   }
 })
