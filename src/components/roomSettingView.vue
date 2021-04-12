@@ -107,6 +107,8 @@
                         return "ボルダルール";
                     case "condorcetRule":
                         return "コンドルセ・ヤングの最尤法";
+                    case "majorityJudgement":
+                        return "マジョリティ・ジャッジメント"
                     default:
                         return ""
                 }
@@ -117,12 +119,9 @@
 </script>
 
 <style>
-    body {
-        user-select: none;
-    }
+  @import "../assets/css/style.css";
 
     #roomsetting-app li {
         list-style: none;
     }
-
 </style>

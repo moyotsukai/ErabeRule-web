@@ -36,21 +36,31 @@
         <div class="result-small-section">
           <p class="text-left supporting-text">結果</p>
           <ul v-for="(results, index) in arrayOfResults">
-            <p
-              v-if="arrayOfResults.length > 1"
-              class="text-left supporting-text"
-            >
+            <p v-if="arrayOfResults.length > 1" class="text-left supporting-text">
               {{ index + 1 }}つ目の可能性
             </p>
-            <li
-              v-for="result in results"
-              class="text-left primary-text results-table"
-            >
-              <span class="rank-label">{{ result.rank }}</span>
-              <span class="optionname-label">{{ result.name }}</span>
-              <span v-if="showRankLabel" class="score-label">{{ result.score }}</span>
-              <span v-else></span>
-            </li>
+
+            <div v-if="roomData.rule !== 'majorityJudgement'">
+              <li v-for="result in results" class="text-left primary-text results-table">
+                <span class="rank-label">{{ result.rank }}</span>
+                <span class="optionname-label">{{ result.name }}</span>
+                <span v-if="showScoreLabel" class="score-label">
+                  {{ result.score }}
+                </span>
+                <span v-else></span>
+              </li>
+            </div>
+            <div v-else>
+              <li v-for="result in results" class="text-left primary-text results-table">
+                <span class="rank-label">{{ result.rank }}</span>
+                <span>
+                  <span class="optionname-label">{{ result.name }}</span>
+                  <p class="optionname-label"> {{ roomData.commonLanguage[result.score - 1] }} </p>
+                </span>
+                <span></span>
+              </li>
+            </div>
+
             <p class="text-right supporting-text">
               {{ numOfVoters }}人が投票済み
             </p>
@@ -63,7 +73,7 @@
           </p>
         </div>
         <div class="result-small-section">
-          <div v-if="roomData.rule !== 'majorityRule'" class="text-left">
+          <div v-if="roomData.rule !== 'majorityRule' && roomData.rule !== 'majorityJudgement'" class="text-left">
             <div v-if="isViewOtherResultsActive">
               <div v-if="otherRulesResults.majorityRule !== undefined">
                 <ul v-for="results in otherRulesResults.majorityRule">
@@ -136,7 +146,7 @@ export default {
       noResultsView: false,
       isClosed: false,
       resultView: false,
-      showRankLabel: true,
+      showScoreLabel: true,
       room: [],
       docId: "",
       resultTitle: "",
@@ -257,6 +267,7 @@ export default {
       if (this.unsubscribe) {
         this.resultTitle = roomData.title;
         this.enteredTitle = roomData.title;
+
         switch (roomData.rule) {
           case "majorityRule":
             this.arrayOfResults = this.majorityRule(
@@ -264,6 +275,7 @@ export default {
               roomData
             );
             break;
+
           case "bordaRule":
             this.arrayOfResults = this.bordaRule(this.personalRanks, roomData);
             this.otherRulesResults = {majorityRule: [], condorcetRule: []};
@@ -278,8 +290,9 @@ export default {
             this.otherRulesResults.condorcetRule = this.removeDuplication(condorcetResultAsOtherRule);
             console.log("otherRulesResults", this.otherRulesResults);
             break;
+
           case "condorcetRule":
-            this.showRankLabel = false;
+            this.showScoreLabel = false;
             const condorcetResult = this.condorcetRule(
               this.personalRanks,
               roomData
@@ -296,6 +309,13 @@ export default {
             );
             console.log("otherRulesResults", this.otherRulesResults)
             break;
+
+          case "majorityJudgement":
+            this.arrayOfResults = this.majorityJudgement(
+              this.personalRanks,
+              roomData);
+            break;
+
           default:
             break;
         }
@@ -617,6 +637,102 @@ export default {
       return comparison;
     },
 
+    majorityJudgement: function (personalRanks, roomData) {
+      let results = [];
+      for (let i = 0; i < roomData.options.length; i++) {
+        results.push({
+          name: roomData.options[i],
+          score: 0,
+          rank: 0
+        });
+      }
+
+      let tieBreakingEvaluations = [];
+      for (let i = 0; i < roomData.options.length; i++) {
+        let evaluations = personalRanks.map(function(personalRank) {
+          return personalRank[i];
+        });
+        evaluations.sort(function(a, b) {
+          return a - b;
+        });
+        let medianEvaluation;
+        if (evaluations.length % 2 == 1) {
+          medianEvaluation = evaluations[Math.floor(evaluations.length / 2)];
+        } else {
+          const higherMedian = evaluations[Math.floor(evaluations.length / 2 - 1)];
+          const lowerMedian = evaluations[Math.floor(evaluations.length / 2)];
+          medianEvaluation = lowerMedian;
+        }
+        results[i].score = medianEvaluation;
+        console.log("medianEvaluation", medianEvaluation);
+        const atLeastMedianEvaluations = evaluations.filter(function(evaluation) {
+          return evaluation <= medianEvaluation;
+        });
+        tieBreakingEvaluations.push(atLeastMedianEvaluations.length);
+      }
+      console.log("tieBreakingEvaluations: ", tieBreakingEvaluations);
+      console.log("results: ", results);
+
+      //Tie Break
+      for (let j = 0; j < results.length; j++) {
+        if (j === 0) { continue; }
+        for (let i = 0; i < j; i++) {
+          if (results[i].score > results[j].score) {
+            results = this.swapAt(results, i, j);
+          } else if (results[i].score === results[j].score) {
+            if (tieBreakingEvaluations[i] < tieBreakingEvaluations[j]){
+              results = this.swapAt(results, i, j);
+            }  else if (tieBreakingEvaluations[i] === tieBreakingEvaluations[j]) {
+              results[i].rank = -results[i].score;
+              results[j].rank = -results[i].score;
+            }
+          }
+        }
+      }
+
+      let finalResults = [];
+      for (let i = 0; i < results.length; i++) {
+        console.log("results[i].score", results[i].score);
+        finalResults.push({
+          name: results[i].name,
+          score: results[i].score,
+          rank: 0
+        });
+      }
+
+      for (let i = 0; i < results.length; i++) {
+        if (i === 0) {
+          finalResults[i].rank = 1;
+          continue;
+        }
+        if (results[i].rank === -results[i].score && results[i - 1].rank == -results[i].score) {
+          finalResults[i].rank = finalResults[i - 1].rank;
+        } else {
+          finalResults[i].rank = finalResults[i - 1].rank + 1;
+        }
+      }
+
+      let finalResultsString = [];
+      for (let i = 0; i < results.length; i++) {
+        console.log("results[i].score", results[i].score);
+        finalResultsString.push({
+          name: finalResults[i].name,
+          score: finalResults[i].score,
+          rank: finalResults[i].rank.toString() + "位"
+        });
+      }
+      console.log("majorityJudgement: ", finalResultsString);
+      return [finalResultsString];
+    },
+
+    swapAt: function (array, i, j) {
+      elementI = array[i];
+      elementJ = array[j];
+      array[i] = elementJ;
+      array[j] = elementI;
+      return array;
+    },
+
     convertRuleNameToDisplayName: function (rule) {
       switch (rule) {
         case "majorityRule":
@@ -625,6 +741,8 @@ export default {
           return "ボルダルール";
         case "condorcetRule":
           return "コンドルセ・ヤングの最尤法";
+        case "majorityJudgement":
+            return "マジョリティ・ジャッジメント"
         default:
           return "";
       }
@@ -634,129 +752,10 @@ export default {
 </script>
 
 <style>
-body {
-  user-select: none;
-}
+  @import "../assets/css/style.css";
 
-.body-padding {
-  padding: 20px;
-}
-
-#room-outline li {
-  list-style: none;
-}
-
-.content {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.result-section {
-  margin: 5px 0 20px 0;
-}
-
-.result-small-section {
-  margin-bottom: 30px;
-}
-
-.supporting-text {
-  font-size: 10pt;
-  color: #4c4c4c;
-}
-
-.primary-text {
-  font-size: 12pt;
-  color: #000000;
-}
-
-.results-table {
-  margin: 5px 0;
-  display: flex;
-  justify-content: space-between;
-}
-
-.rank-label {
-  width: 50px;
-}
-
-.optionname-label {
-  min-width: 200px;
-}
-
-.score-label {
-  min-width: 60px;
-  text-align: right;
-}
-
-.small-loading-section {
-  margin: 0;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.margin-zero-p {
-  margin: 0;
-}
-
-.inlineblock {
-  display: inline-block;
-  text-align: right;
-  vertical-align: middle;
-}
-
-.small-loading-container {
-  position: relative;
-  width: 16px;
-  height: 16px;
-  margin: 0;
-}
-
-.small-loading-b {
-  background: -webkit-radial-gradient(
-    rgba(45, 75, 242, 0.5),
-    rgba(45, 75, 242, 0)
-  );
-  background: radial-gradient(rgba(45, 75, 242, 0.5), rgba(45, 75, 242, 0));
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 0;
-  top: 0;
-  left: 0;
-  margin: 0;
-  border-radius: 50%;
-  animation: live-animation 3s ease infinite;
-}
-
-.small-loading-f {
-  background: #2d4bf2;
-  width: 50%;
-  height: 50%;
-  position: absolute;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  margin: 25%;
-  border-radius: 50%;
-}
-
-@keyframes live-animation {
-  0% {
-    width: 50%;
-    height: 50%;
-    margin: 25%;
+  #room-outline li {
+    list-style: none;
   }
-  50% {
-    width: 50%;
-    height: 50%;
-    margin: 25%;
-  }
-  100% {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-  }
-}
+
 </style>

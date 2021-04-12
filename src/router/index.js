@@ -7,6 +7,7 @@ import roomOutlineView from '@/components/roomOutlineView'
 import formView from '@/components/formView'
 import newRoomView from '@/components/newRoomView'
 import roomSettingView from '@/components/roomSettingView'
+import detailView from '@/components/detailView'
 import news from '@/components/newsView'
 Vue.use(Router)
 
@@ -42,6 +43,10 @@ export default new Router({
             path: '/roomsetting',
             name: 'roomSetting',
             component: roomSettingView
+        },
+        {
+            path: '/detail',
+            component: detailView
         },
         {
             path: '/news',

@@ -118,55 +118,5 @@
 </script>
 
 <style>
-    body {
-        user-select: none;
-    }
-
-    .primary-textfield {
-        /*
-        min-height: 33px;
-        min-width: 220px;
-        font-size: 11pt;
-        */
-        min-height: 37px;
-        min-width: 244px;
-        font-size: 16px;
-        transform: scale(0.9);
-
-        -webkit-appearance: none;
-        vertical-align: middle;
-        border: solid 1px rgb(200, 200, 200);
-        border-radius: 3px;
-        margin: 5px 0;
-        box-shadow: none;
-    }
-
-    .primary-textfield:focus {
-      border: solid 1px #304ffe;
-      border-radius: 3px;;
-      outline: none;
-    }
-
-    .card-button {
-        background: #FFFFFF;
-        border: solid 1px #E2E2E2;
-        color: rgb(20, 20, 20);
-        padding: 5px 15px;
-        border-radius: 3px;
-        text-align: left;
-        vertical-align: middle;
-        font-size: 11pt;
-        padding: 10px 5px;
-        min-width: 200px;
-    }
-
-    .card-button:focus:not(:focus-visible) {
-      outline: none;
-    }
-
-    .card-button:hover {
-        background: #E0E0E0;
-        cursor: pointer;
-    }
-
+ @import "../assets/css/style.css";
 </style>

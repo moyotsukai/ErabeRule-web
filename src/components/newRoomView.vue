@@ -13,7 +13,7 @@
                     <div class="text-left">
                         <button v-on:click="addExplanation" v-if="!hasAddedExplanation" class="text-button">説明文を追加</button>
                     </div>
-                    <input type="text" v-model="enteredExplanation" placeholder="説明文を入力" v-if="hasAddedExplanation" class="primary-textfield newroom-textfield">
+                    <textarea ref="adjust_textarea" type="text" v-model="enteredExplanation" @keydown="adjustHeight" placeholder="説明文を入力" v-if="hasAddedExplanation" class="primary-textfield newroom-textfield"></textarea>
                 </div>
 
                 <div class="result-small-section">
@@ -36,6 +36,21 @@
                             <label v-bind:for="rule.name" class="primary-radio">{{ rule.displayName }}</label>
                             <p v-if="rule.checked" class="rule-explanation">{{ rule.explanation }}</p>
                         </li>
+                    </ul>
+                </div>
+
+                <div v-if="selectedRule == 'majorityJudgement'" class="result-small-section">
+                    <p class="text-left supporting-text">評価の語彙(良い方から順に入力)</p>
+                    <ul>
+                        <li v-for="language in commonLanguage" class="selectrule-table">
+                          <div class="common-language">
+                            <input type="text" v-model="language.text" placeholder="評価の語彙を入力" class="primary-textfield newroom-textfield">
+                            <button v-on:click="deleteLanguage(language.text)" class="delete-button"></button>
+                          </div>
+                        </li>
+                        <div class="text-left">
+                            <button v-on:click="addLanguage" class="text-button">評価の語彙を追加</button>
+                        </div>
                     </ul>
                 </div>
 
@@ -90,7 +105,22 @@
                     displayName: "コンドルセ・ヤングの最尤法",
                     explanation: "選択肢が３つ以上の時に使えます。総当たり戦を元に確率の計算を行います。勝者は他の候補との一騎打ちで必ず勝利します。",
                     checked: false
-                }]
+                }, {
+                  index: 3,
+                  name: "majorityJudgement",
+                  displayName: "マジョリティ・ジャッジメント",
+                  explanation: "各選択肢に対して絶対評価で投票し、中央値をその候補の評価とします。",
+                  checked: false
+                }],
+
+                commonLanguage: [
+                  {text: "非常に良い"},
+                  {text: "良い"},
+                  {text: "まずまず"},
+                  {text: "容認"},
+                  {text: "不十分"},
+                  {text: "失格"}
+                ]
             }
         },
 
@@ -98,11 +128,22 @@
             enteredTitle: function() {
                 this.isFormFilled = this.checkIfFormIsFilled();
             },
-            enteredOptions: function() {
-                this.isFormFilled = this.checkIfFormIsFilled();
+            enteredOptions: {
+                handler: function() {
+                  this.isFormFilled = this.checkIfFormIsFilled();
+                  console.log("enteredOptions: ", this.enteredOptions);
+                },
+                deep: true
             },
             selectedRule: function() {
                 this.isFormFilled = this.checkIfFormIsFilled();
+            },
+            commonLanguage: {
+                handler: function() {
+                  this.isFormFilled = this.checkIfFormIsFilled();
+                  console.log("commonLanguage: ", this.commonLanguage);
+                },
+                deep: true
             }
         },
 
@@ -113,20 +154,26 @@
 
             addOption: function() {
                 this.enteredOptions = this.removeBlanks(this.enteredOptions);
-
                 this.enteredOptions.push({
                     text: ""
                 });
             },
 
-            removeBlanks: function(enteredOptions) {
-                let options = enteredOptions.slice();
-                for (let i = 0; i < options.length; i++) {
-                    if (options[i].text == "") {
-                        options.splice(i, 1);
+            addLanguage: function() {
+                this.commonLanguage = this.removeBlanks(this.commonLanguage);
+                this.commonLanguage.push({
+                  text: ""
+                })
+            },
+
+            removeBlanks: function(array) {
+                let resultArray = [];
+                for (let i = 0; i < array.length; i++) {
+                    if (array[i].text != "") {
+                        resultArray.push(array[i]);
                     }
                 }
-                return options;
+                return resultArray;
             },
 
             radioChecked: function(rule) {
@@ -138,7 +185,6 @@
                             break;
                         }
                     }
-                    console.log("checkedRule: ", checkedRule);
                     if (checkedRule != undefined) {
                         document.getElementById(checkedRule.name).checked = false;
                         document.getElementById(rule.name).checked = true;
@@ -154,6 +200,7 @@
                 }
 
                 this.selectedRule = this.findSelectedRule();
+                console.log("selectedRuleL ", this.selectedRule);
             },
 
             findSelectedRule: function() {
@@ -167,15 +214,29 @@
                 return rule;
             },
 
+            deleteLanguage: function(text) {
+                const index = this.commonLanguage.findIndex(function(value, index, array) {
+                  if (value.text == text) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                });
+                this.commonLanguage.splice(index, 1);
+            },
+
             checkIfFormIsFilled: function() {
                 let isFilled = true;
                 if (this.enteredTitle == undefined || this.enteredTitle == "") {
                     isFilled = false;
                 }
-                if (this.removeBlanks(this.enteredOptions).length < 1) {
+                if (this.removeBlanks(this.enteredOptions).length == 0) {
                     isFilled = false;
                 }
-                if (this.selectedRule == undefined) {
+                if (this.selectedRule == "" || this.selectedRule == undefined) {
+                    isFilled = false;
+                }
+                if (this.removeBlanks(this.commonLanguage).length == 0) {
                     isFilled = false;
                 }
                 return isFilled;
@@ -187,6 +248,7 @@
                 console.log("selectedRule: ", this.selectedRule);
 
                 const options = this.generateOptionsArray();
+                const commonLanguage = this.generateCommonLanguage();
                 let explanation = "";
                 if (this.enteredExplanation == undefined) {
                     explanation = "";
@@ -194,18 +256,32 @@
                     explanation = this.enteredExplanation;
                 }
                 console.log("explanation: ", explanation);
-                this.send(options, explanation);
+                this.send(options, explanation, commonLanguage);
             },
 
             generateOptionsArray: function() {
                 let options = [];
                 for (let i = 0; i < this.enteredOptions.length; i++) {
-                    options.push(this.enteredOptions[i].text);
+                    const option = this.enteredOptions[i].text;
+                    if (option != "") {
+                      options.push(option);
+                    }
                 }
                 return options;
             },
 
-            send: function(options, explanation) {
+            generateCommonLanguage: function() {
+                let commonLanguage = [];
+                for (let i = 0; i < this.commonLanguage.length; i++) {
+                  const language = this.commonLanguage[i].text;
+                  if (language != "") {
+                    commonLanguage.push(language);
+                  }
+                }
+                return commonLanguage;
+            },
+
+            send: function(options, explanation, commonLanguage) {
                 const title = this.enteredTitle;
                 const db = firebase.firestore();
                 const roomsRef = db.collection("rooms");
@@ -226,17 +302,34 @@
                         console.log("newRoomId: ", newRoomId);
                         const userId = firebase.auth().currentUser.uid;
                         console.log("userId: ", userId);
+                        let dataObject;
+                        if (this.selectedRule == "majorityJudgement") {
+                          dataObject = {
+                              title: this.enteredTitle,
+                              explanation: explanation,
+                              options: options,
+                              commonLanguage: commonLanguage,
+                              rule: this.selectedRule,
+                              state: "ongoing",
+                              senderId: userId,
+                              date: new Date()
+                          }
+                        } else {
+                          dataObject = {
+                              title: this.enteredTitle,
+                              explanation: explanation,
+                              options: options,
+                              rule: this.selectedRule,
+                              state: "ongoing",
+                              senderId: userId,
+                              date: new Date()
+                          }
+                        }
+                        console.log("dataObject: ", dataObject);
 
-                        roomRef.set({
-                            title: this.enteredTitle,
-                            explanation: explanation,
-                            options: options,
-                            rule: this.selectedRule,
-                            state: "ongoing",
-                            senderId: userId,
-                            date: new Date()
-
-                        }).then(function() {
+                        roomRef.set(
+                          dataObject
+                        ).then(function() {
 
                             //getUserAttendance
                             const userRef = db.collection("users").doc(userId);
@@ -305,6 +398,16 @@
 
                 });
 
+            },
+
+            adjustHeight: function() {
+              const textarea = this.$refs.adjust_textarea
+              const resetHeight = new Promise(function(resolve) {
+                resolve(textarea.style.height = 'auto')
+              });
+              resetHeight.then(function(){
+                textarea.style.height = textarea.scrollHeight + 'px'
+              });
             }
         }
     }
@@ -312,52 +415,9 @@
 </script>
 
 <style>
-    body {
-        user-select: none;
-    }
+  @import "../assets/css/style.css";
 
-    #newroom-app li {
-        list-style: none;
-    }
-
-    .newroom-textfield {
-        /*        width: 100%;*/
-        width: 111%;
-        margin-left: -5.5%;
-    }
-
-    .selectrule-table {
-        margin: 10px 0;
-        text-align: left;
-    }
-
-    .rule-explanation {
-        margin: 0 0 0 30px;
-        font-weight: 400;
-        color: rgba(0, 0, 0, 0.7);
-    }
-
-    .text-button {
-        text-align: center;
-        color: #2D4BF2;
-        border: none;
-        background: 0;
-        padding: 5px 15px;
-        border-radius: 5px;
-        vertical-align: middle;
-        font-size: 11pt;
-    }
-
-    .text-button:hover {
-        background: rgba(0, 0, 0, 0.05);
-    }
-
-    .text-button:focus:not(:focus-visible) {
-      outline: none;
-    }
-
-    .error-color {
-        color: #B00020;
-    }
-
+  #newroom-app li {
+      list-style: none;
+  }
 </style>

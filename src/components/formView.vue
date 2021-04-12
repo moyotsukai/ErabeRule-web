@@ -9,21 +9,36 @@
 
                 <div v-if="showForm">
                     <div class="result-small-section">
-
                         <p v-if="hasExplanation" class="text-left supporting-text">説明</p>
                         <p v-if="hasExplanation" class="text-left primary-text">{{ explanation }}</p>
                     </div>
 
-                    <div class="result-small-section">
-                        <p class="text-left supporting-text">選択肢（支持する順に選んで順位をつけます。）</p>
-                        <ul>
-                            <li v-for="option in options" class="text-left primary-text results-table">
-                                <input type="checkbox" v-bind:id="option.name + option.index" v-model="option.checked" @change="changed(option)" v-if="isCheckBoxStyle">
-                                <input type="radio" v-bind:id="option.name + option.index" v-model="option.checked" v-on:click="radioChecked(option)" v-if="!isCheckBoxStyle">
-                                <label v-bind:for="option.name + option.index" class="optionname-label" v-bind:class="isCheckBoxStyle? 'primary-checkbox' : 'primary-radio'">{{ option.name }}</label>
-                                <label v-bind:for="option.name + option.index" v-if="showRankLabel && option.personalRank != 0" class="personalrank-label">{{ option.personalRank }}</label>
-                            </li>
-                        </ul>
+                    <div v-if="roomData.rule != 'majorityJudgement'">
+                        <div class="result-small-section">
+                            <p v-if="roomData.rule == 'majorityRule'" class="text-left supporting-text">選択肢</p>
+                            <p v-else class="text-left supporting-text">選択肢（支持する順に選んで順位をつけます。）</p>
+                            <ul>
+                                <li v-for="option in options" class="text-left primary-text results-table">
+                                    <input type="checkbox" v-bind:id="option.name + option.index" v-model="option.checked" @change="changed(option)" v-if="isCheckBoxStyle">
+                                    <input type="radio" v-bind:id="option.name + option.index" v-model="option.checked" v-on:click="radioChecked(option)" v-if="!isCheckBoxStyle">
+                                    <label v-bind:for="option.name + option.index" class="optionname-label" v-bind:class="isCheckBoxStyle? 'primary-checkbox' : 'primary-radio'">{{ option.name }}</label>
+                                    <label v-bind:for="option.name + option.index" v-if="showRankLabel && option.personalRank != 0" class="personalrank-label">{{ option.personalRank }}</label>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div v-else>
+                        <div v-for="(option, i) in options" class="result-small-section">
+                            <p class="text-left supporting-text">選択肢{{ i + 1 }}</p>
+                            <p class="text-left primary-text optionname-label">{{ option.name }}</p>
+                            <ul>
+                              <li v-for="(language, j) in roomData.commonLanguage" class="text-left primary-text results-table">
+                                <input type="radio" v-bind:id="option.name + i.toString() + language + j.toString()" v-model="mjOptions[i].evaluationLanguage[j].checked" v-on:click="mjRadioChecked(i, j)">
+                                <label v-bind:for="option.name + i.toString() + language + j.toString()" class="primary-radio optionname-label">{{ language }}</label>
+                              </li>
+                            </ul>
+                        </div>
                     </div>
 
                     <div class="result-small-section">
@@ -59,6 +74,7 @@
                 hasExplanation: false,
                 explanation: "",
                 options: [],
+                mjOptions: [],
                 isCheckBoxStyle: true,
                 showRankLabel: true,
                 rule: "",
@@ -90,6 +106,23 @@
                 this.personalRank.push(0);
             }
 
+            if (this.roomData.rule == "majorityJudgement") {
+              for (let i = 0; i < this.roomData.options.length; i++) {
+                const commonLanguage = this.roomData.commonLanguage;
+                let evaluationLanguage = [];
+                for (let j = 0; j < commonLanguage.length; j++) {
+                  evaluationLanguage.push({
+                    commonLanguage: commonLanguage[j],
+                    checked: false
+                  });
+                }
+                this.mjOptions.push({
+                  name: this.roomData.options[i],
+                  evaluationLanguage: evaluationLanguage
+                });
+              }
+            }
+
             if (this.roomData.rule == "majorityRule") {
                 this.isCheckBoxStyle = false;
                 this.showRankLabel = false;
@@ -105,6 +138,15 @@
 
             radioChecked: function(option) {
                 this.makeSingleSelection(option);
+            },
+
+            mjRadioChecked: function(i, j) {
+              this.mjOptions[i].evaluationLanguage[j].checked = !this.mjOptions[i].evaluationLanguage[j].checked;
+              for (let k = 0; k < this.mjOptions[i].evaluationLanguage.length; k++) {
+                if (k == j) { continue; }
+                this.mjOptions[i].evaluationLanguage[k].checked = false;
+              }
+              this.makeMjSelection(i, j);
             },
 
             makeSingleSelection: function(option) {
@@ -170,6 +212,24 @@
                 } else {
                     this.isFormFilled = false;
                 }
+            },
+
+            makeMjSelection: function(i, j) {
+              const rank = j + 1;
+              const currentRank = this.personalRank[i];
+              if (currentRank == rank) {
+                this.personalRank[i] = 0;
+              } else {
+                this.personalRank[i] = rank;
+              }
+              console.log(this.personalRank);
+
+              let rankWithValue = this.personalRank.filter(item => item != 0);
+              if (rankWithValue.length == this.personalRank.length) {
+                  this.isFormFilled = true;
+              } else {
+                  this.isFormFilled = false;
+              }
             },
 
             send: function() {
@@ -275,6 +335,8 @@
                         return "ボルダルール";
                     case "condorcetRule":
                         return "コンドルセ・ヤングの最尤法";
+                    case "majorityJudgement":
+                        return "マジョリティ・ジャッジメント"
                     default:
                         return ""
                 }
@@ -285,114 +347,9 @@
 </script>
 
 <style>
-    body {
-        user-select: none;
-    }
+  @import "../assets/css/style.css";
 
-    #form li {
-        list-style: none;
-    }
-
-    .primary-button:disabled {
-        background: rgba(48, 79, 254, 0.38);
-        cursor: default;
-    }
-
-
-    input[type=radio] {
-        display: none;
-    }
-
-    .primary-radio {
-        box-sizing: border-box;
-        cursor: pointer;
-        display: inline-block;
-        padding: 5px 30px;
-        position: relative;
-        width: auto;
-    }
-
-    .primary-radio::before {
-        border: 1px solid #304FFE;
-        border-radius: 50%;
-        content: '';
-        display: block;
-        height: 16px;
-        left: 5px;
-        margin-top: -8px;
-        position: absolute;
-        top: 50%;
-        width: 16px;
-    }
-
-    .primary-radio::after {
-        background: #304FFE;
-        border-radius: 50%;
-        content: '';
-        display: block;
-        height: 10px;
-        left: 8px;
-        margin-top: -5px;
-        opacity: 0;
-        position: absolute;
-        top: 50%;
-        width: 10px;
-    }
-
-    input[type=radio]:checked+.primary-radio::after {
-        opacity: 1;
-    }
-
-
-    input[type=checkbox] {
-        display: none;
-    }
-
-    .primary-checkbox {
-        box-sizing: border-box;
-        cursor: pointer;
-        display: inline-block;
-        padding: 5px 30px;
-        position: relative;
-        width: auto;
-    }
-
-    .primary-checkbox::before {
-        border: 1px solid #304FFE;
-        border-radius: 1px;
-        content: '';
-        display: block;
-        height: 16px;
-        left: 5px;
-        margin-top: -8px;
-        position: absolute;
-        top: 50%;
-        width: 16px;
-    }
-
-    .primary-checkbox::after {
-        border-right: 2px solid #304FFE;
-        border-bottom: 2px solid #304FFE;
-        content: '';
-        display: block;
-        height: 12px;
-        width: 6px;
-        left: 10px;
-        margin-top: -8px;
-        opacity: 0;
-        position: absolute;
-        top: 50%;
-        transform: rotate(45deg);
-    }
-
-    input[type=checkbox]:checked+.primary-checkbox::after {
-        opacity: 1;
-    }
-
-    .personalrank-label {
-        min-width: 60px;
-        text-align: right;
-        color: #2D4BF2;
-    }
-
+  #form li {
+      list-style: none;
+  }
 </style>

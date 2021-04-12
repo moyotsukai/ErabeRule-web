@@ -1,8 +1,8 @@
 <template>
   <div id="news-app" class="body-padding">
     <div class="home-content">
+      <p class="page-title">リリースノート</p>
       <div class="home-section">
-        <p class="page-title">リリースノート</p>
         <ul class="text-left">
           <div class="news">
             <p class="supporting-text">2021/3/9</p>
@@ -26,23 +26,13 @@
 </script>
 
 <style>
-  body {
-    user-select: none;
-  }
+@import "../assets/css/style.css";
 
-  #news-app li {
-    list-style: none;
-  }
+#news-app li {
+  list-style: none;
+}
 
-  #news-app p {
-    margin: 10px 0;
-  }
-
-  .page-title {
-    font-size: 15pt;
-  }
-
-  .news {
-    margin: 30px 0;
-  }
+#news-app p {
+  margin: 10px 0;
+}
 </style>

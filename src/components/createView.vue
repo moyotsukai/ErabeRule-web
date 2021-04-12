@@ -84,8 +84,5 @@
 </script>
 
 <style>
-    body {
-        user-select: none;
-    }
-
+  @import "../assets/css/style.css";
 </style>
