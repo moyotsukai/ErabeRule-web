@@ -16,6 +16,16 @@
       <div class="home-section">
         <ul class="text-left">
           <div class="news">
+            <p class="supporting-text">2021/06/22</p>
+            <li class="primary-text">
+              「結果を検証」の新機能
+              <br />
+              マジョリティ・ジャッジメントで集計されたルームの結果の画面で、「結果の検証」ボタンを押すと、もし平均を使っていたらどんな結果になっていたかシュミレーションできます。
+              マジョリティ・ジャッジメントは中央値を使っているのが特徴ですが、単純な平均値と比べてどのくらい戦略的操作をされにくいのか、比較する参考になるのではないかと思います。
+            </li>
+          </div>
+
+          <div class="news">
             <p class="supporting-text">2021/04/12</p>
             <li class="primary-text">
               マジョリティ・ジャッジメント(Majority Judgement)を追加しました。

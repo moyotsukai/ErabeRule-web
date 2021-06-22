@@ -35,13 +35,20 @@
         </div>
         <div class="result-small-section">
           <p class="text-left supporting-text">結果</p>
-          <ul v-for="(results, index) in arrayOfResults">
-            <p v-if="arrayOfResults.length > 1" class="text-left supporting-text">
+          <ul v-for="(results, index, key) in arrayOfResults" :key="key">
+            <p
+              v-if="arrayOfResults.length > 1"
+              class="text-left supporting-text"
+            >
               {{ index + 1 }}つ目の可能性
             </p>
 
             <div v-if="roomData.rule !== 'majorityJudgement'">
-              <li v-for="result in results" class="text-left primary-text results-table">
+              <li
+                v-for="(result, key) in results"
+                class="text-left primary-text results-table"
+                :key="key"
+              >
                 <span class="rank-label">{{ result.rank }}</span>
                 <span class="optionname-label">{{ result.name }}</span>
                 <span v-if="showScoreLabel" class="score-label">
@@ -51,11 +58,17 @@
               </li>
             </div>
             <div v-else>
-              <li v-for="result in results" class="text-left primary-text results-table">
+              <li
+                v-for="(result, key) in results"
+                class="text-left primary-text results-table"
+                :key="key"
+              >
                 <span class="rank-label">{{ result.rank }}</span>
                 <span>
                   <span class="optionname-label">{{ result.name }}</span>
-                  <p class="optionname-label"> {{ roomData.commonLanguage[result.score - 1] }} </p>
+                  <p class="optionname-label">
+                    {{ roomData.commonLanguage[result.score - 1] }}
+                  </p>
                 </span>
                 <span></span>
               </li>
@@ -73,14 +86,18 @@
           </p>
         </div>
         <div class="result-small-section">
-          <div v-if="roomData.rule !== 'majorityRule' && roomData.rule !== 'majorityJudgement'" class="text-left">
+          <div v-if="roomData.rule !== 'majorityRule'" class="text-left">
             <div v-if="isViewOtherResultsActive">
               <div v-if="otherRulesResults.majorityRule !== undefined">
-                <ul v-for="results in otherRulesResults.majorityRule">
+                <ul
+                  v-for="(results, key) in otherRulesResults.majorityRule"
+                  :key="key"
+                >
                   <p>もし多数決だったら</p>
                   <li
-                    v-for="result in results"
+                    v-for="(result, key) in results"
                     class="text-left primary-text results-table"
+                    :key="key"
                   >
                     <span class="rank-label">{{ result.rank }}</span>
                     <span class="optionname-label">{{ result.name }}</span>
@@ -89,11 +106,15 @@
                 </ul>
               </div>
               <div v-if="otherRulesResults.bordaRule !== undefined">
-                <ul v-for="results in otherRulesResults.bordaRule">
+                <ul
+                  v-for="(results, key) in otherRulesResults.bordaRule"
+                  :key="key"
+                >
                   <p>もしボルダルールだったら</p>
                   <li
-                    v-for="result in results"
+                    v-for="(result, key) in results"
                     class="text-left primary-text results-table"
+                    :key="key"
                   >
                     <span class="rank-label">{{ result.rank }}</span>
                     <span class="optionname-label">{{ result.name }}</span>
@@ -102,7 +123,12 @@
                 </ul>
               </div>
               <div v-if="otherRulesResults.condorcetRule !== undefined">
-                <ul v-for="(results, index) in otherRulesResults.condorcetRule">
+                <ul
+                  v-for="(
+                    results, index, key
+                  ) in otherRulesResults.condorcetRule"
+                  :key="key"
+                >
                   <p class="text-left supporting-text">
                     もしコンドルセ・ヤングの最尤法だったら
                     <span v-if="otherRulesResults.condorcetRule.length > 1">
@@ -110,8 +136,9 @@
                     </span>
                   </p>
                   <li
-                    v-for="result in results"
+                    v-for="(result, key) in results"
                     class="text-left primary-text results-table"
+                    :key="key"
                   >
                     <span class="rank-label">{{ result.rank }}</span>
                     <span class="optionname-label">{{ result.name }}</span>
@@ -119,11 +146,33 @@
                   </li>
                 </ul>
               </div>
-          </div>
-          <button v-on:click="toggleViewOtherRules" class="text-button">
-            <div v-if="isViewOtherResultsActive">結果の検証を非表示</div>
-            <div v-else>結果の検証を表示</div>
-          </button>
+              <div v-if="otherRulesResults.averageScore !== undefined">
+                <ul
+                  v-for="(results, key) in otherRulesResults.averageScore"
+                  :key="key"
+                >
+                  <p>もし平均を使っていたら</p>
+                  <li
+                    v-for="(result, key) in results"
+                    class="text-left primary-text results-table"
+                    :key="key"
+                  >
+                    <span class="rank-label">{{ result.rank }}</span>
+                    <span>
+                      <span class="optionname-label">{{ result.name }}</span>
+                      <p class="optionname-label">
+                        {{ result.score }}
+                      </p>
+                    </span>
+                    <span></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <button v-on:click="toggleViewOtherRules" class="text-button">
+              <div v-if="isViewOtherResultsActive">結果の検証を非表示</div>
+              <div v-else>結果の検証を表示</div>
+            </button>
           </div>
         </div>
       </div>
@@ -156,7 +205,7 @@ export default {
       personalRanks: [],
       numOfVoters: [],
       isViewOtherResultsActive: false,
-      otherRulesResults: []
+      otherRulesResults: {},
     };
   },
 
@@ -278,7 +327,7 @@ export default {
 
           case "bordaRule":
             this.arrayOfResults = this.bordaRule(this.personalRanks, roomData);
-            this.otherRulesResults = {majorityRule: [], condorcetRule: []};
+            this.otherRulesResults = { majorityRule: [], condorcetRule: [] };
             this.otherRulesResults.majorityRule = this.majorityRule(
               this.personalRanks,
               roomData
@@ -287,7 +336,9 @@ export default {
               this.personalRanks,
               roomData
             );
-            this.otherRulesResults.condorcetRule = this.removeDuplication(condorcetResultAsOtherRule);
+            this.otherRulesResults.condorcetRule = this.removeDuplication(
+              condorcetResultAsOtherRule
+            );
             console.log("otherRulesResults", this.otherRulesResults);
             break;
 
@@ -298,7 +349,7 @@ export default {
               roomData
             );
             this.arrayOfResults = this.removeDuplication(condorcetResult);
-            this.otherRulesResults = {majorityRule: [], bordaRule: []};
+            this.otherRulesResults = { majorityRule: [], bordaRule: [] };
             this.otherRulesResults.majorityRule = this.majorityRule(
               this.personalRanks,
               roomData
@@ -307,13 +358,20 @@ export default {
               this.personalRanks,
               roomData
             );
-            console.log("otherRulesResults", this.otherRulesResults)
+            console.log("otherRulesResults", this.otherRulesResults);
             break;
 
           case "majorityJudgement":
             this.arrayOfResults = this.majorityJudgement(
               this.personalRanks,
-              roomData);
+              roomData
+            );
+            this.otherRulesResults = { averageScore: [] };
+            this.otherRulesResults.averageScore = this.averageScore(
+              this.personalRanks,
+              roomData
+            );
+            console.log("otherRulesResults", this.otherRulesResults);
             break;
 
           default:
@@ -335,11 +393,11 @@ export default {
     removeDuplication: function (arrayOfResults) {
       //jsではsliceされた要素は参照が異なるので、異なる値としてみられる
       // mapを使ってarrayIndexのみの配列を作ってそれを比較すれば参照にならない。
-      const optionNames = arrayOfResults.map(function(results) {
-        let optionsName = ""
+      const optionNames = arrayOfResults.map(function (results) {
+        let optionsName = "";
         for (let i = 0; i < results.length; i++) {
-          const result = results[i]
-          optionsName += result.name + result.arrayIndex
+          const result = results[i];
+          optionsName += result.name + result.arrayIndex;
         }
         return optionsName;
       });
@@ -348,10 +406,14 @@ export default {
       const newArray = [arrayOfResults[0]];
       for (let i = 0; i < arrayOfResults.length; i++) {
         for (let j = 0; j < i; j++) {
-          if (i === 0) { break; }
+          if (i === 0) {
+            break;
+          }
           const resultsI = optionNames[i];
           const resultsJ = optionNames[j];
-          if (resultsI === resultsJ) { break; }
+          if (resultsI === resultsJ) {
+            break;
+          }
           if (j === i - 1) {
             newArray.push(arrayOfResults[i]);
           }
@@ -561,7 +623,7 @@ export default {
         }
         console.log("results", results);
         //sort
-        results.sort(function(a, b) {
+        results.sort(function (a, b) {
           return a.rank - b.rank;
         });
         console.log("results", results);
@@ -643,29 +705,30 @@ export default {
         results.push({
           name: roomData.options[i],
           score: 0,
-          rank: 0
+          rank: 0,
         });
       }
 
       let tieBreakingEvaluations = [];
       for (let i = 0; i < roomData.options.length; i++) {
-        let evaluations = personalRanks.map(function(personalRank) {
+        let evaluations = personalRanks.map(function (personalRank) {
           return personalRank[i];
         });
-        evaluations.sort(function(a, b) {
+        evaluations.sort(function (a, b) {
           return a - b;
         });
         let medianEvaluation;
         if (evaluations.length % 2 == 1) {
           medianEvaluation = evaluations[Math.floor(evaluations.length / 2)];
         } else {
-          const higherMedian = evaluations[Math.floor(evaluations.length / 2 - 1)];
           const lowerMedian = evaluations[Math.floor(evaluations.length / 2)];
           medianEvaluation = lowerMedian;
         }
         results[i].score = medianEvaluation;
         console.log("medianEvaluation", medianEvaluation);
-        const atLeastMedianEvaluations = evaluations.filter(function(evaluation) {
+        const atLeastMedianEvaluations = evaluations.filter(function (
+          evaluation
+        ) {
           return evaluation <= medianEvaluation;
         });
         tieBreakingEvaluations.push(atLeastMedianEvaluations.length);
@@ -675,14 +738,18 @@ export default {
 
       //Tie Break
       for (let j = 0; j < results.length; j++) {
-        if (j === 0) { continue; }
+        if (j === 0) {
+          continue;
+        }
         for (let i = 0; i < j; i++) {
           if (results[i].score > results[j].score) {
             results = this.swapAt(results, i, j);
           } else if (results[i].score === results[j].score) {
-            if (tieBreakingEvaluations[i] < tieBreakingEvaluations[j]){
+            if (tieBreakingEvaluations[i] < tieBreakingEvaluations[j]) {
               results = this.swapAt(results, i, j);
-            }  else if (tieBreakingEvaluations[i] === tieBreakingEvaluations[j]) {
+            } else if (
+              tieBreakingEvaluations[i] === tieBreakingEvaluations[j]
+            ) {
               results[i].rank = -results[i].score;
               results[j].rank = -results[i].score;
             }
@@ -696,7 +763,7 @@ export default {
         finalResults.push({
           name: results[i].name,
           score: results[i].score,
-          rank: 0
+          rank: 0,
         });
       }
 
@@ -705,7 +772,10 @@ export default {
           finalResults[i].rank = 1;
           continue;
         }
-        if (results[i].rank === -results[i].score && results[i - 1].rank == -results[i].score) {
+        if (
+          results[i].rank === -results[i].score &&
+          results[i - 1].rank == -results[i].score
+        ) {
           finalResults[i].rank = finalResults[i - 1].rank;
         } else {
           finalResults[i].rank = finalResults[i - 1].rank + 1;
@@ -718,7 +788,7 @@ export default {
         finalResultsString.push({
           name: finalResults[i].name,
           score: finalResults[i].score,
-          rank: finalResults[i].rank.toString() + "位"
+          rank: finalResults[i].rank.toString() + "位",
         });
       }
       console.log("majorityJudgement: ", finalResultsString);
@@ -733,6 +803,57 @@ export default {
       return array;
     },
 
+    averageScore: function (personalRanks, roomData) {
+      let results = [];
+      for (let i = 0; i < roomData.options.length; i++) {
+        results.push({
+          name: roomData.options[i],
+          score: 0,
+          rank: 0,
+        });
+      }
+      const maxScore = roomData.commonLanguage.length;
+      console.log("maxScore: " + maxScore);
+
+      for (let i = 0; i < personalRanks.length; i++) {
+        const personalRank = personalRanks[i];
+        for (let j = 0; j < personalRank.length; j++) {
+          const score = maxScore - (personalRank[j] - 1);
+          results[j].score += score;
+        }
+      }
+      for (let i = 0; i < results.length; i++) {
+        const average = results[i].score / personalRanks.length;
+        const roundedAverage = Math.round(average * 10) / 10;
+        results[i].score = roundedAverage;
+      }
+      console.log("average: ", results);
+      results.sort(function (a, b) {
+        return b.score - a.score;
+      });
+      for (let i = 0; i < results.length; i++) {
+        results[i].rank = i + 1;
+      }
+      for (let i = 0; i < results.length; i++) {
+        if (i == results.length - 1) {
+          break;
+        }
+        if (results[i].score == results[i + 1].score) {
+          results[i + 1].rank = results[i].rank;
+        }
+      }
+      let resultsString = [];
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        resultsString.push({
+          name: result.name,
+          score: result.score.toString() + "/" + maxScore,
+          rank: result.rank.toString() + "位",
+        });
+      }
+      return [resultsString];
+    },
+
     convertRuleNameToDisplayName: function (rule) {
       switch (rule) {
         case "majorityRule":
@@ -742,7 +863,7 @@ export default {
         case "condorcetRule":
           return "コンドルセ・ヤングの最尤法";
         case "majorityJudgement":
-            return "マジョリティ・ジャッジメント"
+          return "マジョリティ・ジャッジメント";
         default:
           return "";
       }
@@ -752,10 +873,9 @@ export default {
 </script>
 
 <style>
-  @import "../assets/css/style.css";
+@import "../assets/css/style.css";
 
-  #room-outline li {
-    list-style: none;
-  }
-
+#room-outline li {
+  list-style: none;
+}
 </style>
