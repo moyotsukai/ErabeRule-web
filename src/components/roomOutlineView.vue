@@ -813,7 +813,6 @@ export default {
         });
       }
       const maxScore = roomData.commonLanguage.length;
-      console.log("maxScore: " + maxScore);
 
       for (let i = 0; i < personalRanks.length; i++) {
         const personalRank = personalRanks[i];
