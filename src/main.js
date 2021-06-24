@@ -8,8 +8,6 @@ Vue.config.productionTip = false
 
 import firebase from 'firebase'
 
-console.log(process.env);
-
 var firebaseConfig = {
     apiKey: process.env.VUE_APP_API_KEY,
     authDomain: process.env.VUE_APP_AUTH_DOMAIN,
