@@ -1,0 +1,28 @@
+<!DOCTYPE html><html><head><meta charset=utf-8><title>ErabeRule</title><meta name=viewport content="width=device-width,initial-scale=1"><script src=https://cdn.jsdelivr.net/npm/vue@2></script><link rel=icon type=image/x-icon href=static/favicon.ico><link rel=apple-touch-icon sizes=180x180 href=static/favicon.ico><script>(function (d) {
+      var config = {
+        kitId: 'ybu8hjv',
+        scriptTimeout: 3000,
+        async: true
+      },
+        h = d.documentElement,
+        t = setTimeout(function () {
+          h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive";
+        }, config.scriptTimeout),
+        tk = d.createElement("script"),
+        f = false,
+        s = d.getElementsByTagName("script")[0],
+        a;
+      h.className += " wf-loading";
+      tk.src = 'https://use.typekit.net/' + config.kitId + '.js';
+      tk.async = true;
+      tk.onload = tk.onreadystatechange = function () {
+        a = this.readyState;
+        if (f || a && a != "complete" && a != "loaded") return;
+        f = true;
+        clearTimeout(t);
+        try {
+          Typekit.load(config)
+        } catch (e) { }
+      };
+      s.parentNode.insertBefore(tk, s)
+    })(document);</script><link href=/static/css/app.92818059324863337425004774b46552.css rel=stylesheet></head><body><div id=app></div><script type=text/javascript src=/static/js/manifest.2ae2e69a05c33dfc65f8.js></script><script type=text/javascript src=/static/js/vendor.9b61f34593fee234c433.js></script><script type=text/javascript src=/static/js/app.d843a31af18100c79154.js></script></body></html>
